@@ -5,7 +5,7 @@
 </p>
 
 <p align="center">
-  <img width="256" height="256" alt="contpress Logo" src="https://github.com/Arkay92/ContextPress/blob/main/contpress.png?raw=true" />
+  <img width="256" height="256" alt="contpress Logo" src="https://raw.githubusercontent.com/Arkay92/ContextPress/refs/heads/main/contextpress.png" />
 </p>
 
 <p align="center">
@@ -455,7 +455,7 @@ contpress report prompt.txt --budget 8000
 ## Project Structure
 
 ```text
-src/contextpress/
+src/contpress/
   __init__.py              # Public API
   core.py                  # ContextPress and OptimizedPrompt
   tokenizer.py             # TokenCounter
@@ -479,7 +479,7 @@ tests/
     ci.yml                 # Tests and package build
     publish.yml            # PyPI publishing workflow
 pyproject.toml             # Project metadata and dependencies
-contpress.png           # Project logo
+contextpress.png           # Project logo
 ```
 
 ---
@@ -544,7 +544,7 @@ budget, and the optimization behavior you expected.
 If you use contpress in research, please cite:
 
 ```bibtex
-@software{contextpress2026,
+@software{contpress2026,
   title={contpress: A Practical Python Toolkit for Making Every LLM Token Count},
   author={Arkay92},
   url={https://github.com/Arkay92/ContextPress},
