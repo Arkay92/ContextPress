@@ -8,6 +8,12 @@ on:
   release:
     types: [published]
   workflow_dispatch:
+    inputs:
+      use-api-token:
+        description: "Use PYPI_API_TOKEN instead of trusted publishing"
+        required: false
+        default: false
+        type: boolean
 
 permissions:
   contents: read
@@ -17,7 +23,7 @@ jobs:
     name: Build and publish
     runs-on: ubuntu-latest
     env:
-      HAS_PYPI_TOKEN: ${{ secrets.PYPI_API_TOKEN != '' }}
+      USE_PYPI_TOKEN: ${{ github.event_name == 'workflow_dispatch' && inputs.use-api-token }}
     environment:
       name: pypi
       url: https://pypi.org/p/contextpress
@@ -44,11 +50,11 @@ jobs:
         run: python -m build
 
       - name: Publish distributions to PyPI with API token
-        if: env.HAS_PYPI_TOKEN == 'true'
+        if: env.USE_PYPI_TOKEN == 'true'
         uses: pypa/gh-action-pypi-publish@release/v1
         with:
           password: ${{ secrets.PYPI_API_TOKEN }}
 
       - name: Publish distributions to PyPI with trusted publishing
-        if: env.HAS_PYPI_TOKEN != 'true'
+        if: env.USE_PYPI_TOKEN != 'true'
         uses: pypa/gh-action-pypi-publish@release/v1

@@ -506,9 +506,10 @@ GitHub Actions includes:
 - `CI`: runs tests and builds the package on pushes and pull requests.
 - `Publish to PyPI`: builds and publishes distributions when a GitHub release is published, or when run manually.
 
-The publish workflow uses PyPI trusted publishing. Configure the PyPI project
-with this GitHub repository, the `pypi` environment, and the
-`.github/workflows/publish.yml` workflow before publishing a release.
+The publish workflow uses PyPI trusted publishing by default. Configure the PyPI
+project with this GitHub repository, the `pypi` environment, and the
+`.github/workflows/publish.yml` workflow before publishing a release or pushing a
+version tag.
 
 Trusted publishing settings on PyPI must match:
 
@@ -518,9 +519,10 @@ Trusted publishing settings on PyPI must match:
 - Workflow name: `publish.yml`
 - Environment name: `pypi`
 
-Alternatively, add a GitHub secret named `PYPI_API_TOKEN`. Use a PyPI token that
-is valid for the `contextpress` project, or an account-scoped token for the first
-upload if the project does not exist yet.
+Alternatively, add a GitHub secret named `PYPI_API_TOKEN` and run the workflow
+manually with `use-api-token` enabled. Use a PyPI token that is valid for the
+`contextpress` project, or an account-scoped token for the first upload if the
+project does not exist yet.
 
 ---
 
