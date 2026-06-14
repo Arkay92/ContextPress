@@ -1,4 +1,4 @@
-from contextpress import PromptBuilder
+from contpress import PromptBuilder
 
 
 def test_prompt_builder_outputs_compact_blocks():

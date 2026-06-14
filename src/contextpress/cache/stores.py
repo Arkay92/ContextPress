@@ -16,7 +16,7 @@ class InMemoryStore:
 
 
 class RedisStore:
-    def __init__(self, url: str = "redis://localhost:6379/0", prefix: str = "contextpress") -> None:
+    def __init__(self, url: str = "redis://localhost:6379/0", prefix: str = "contpress") -> None:
         try:
             import redis
         except ImportError as exc:

@@ -6,7 +6,7 @@ class LLMLinguaCompressor:
         try:
             from llmlingua import PromptCompressor
         except ImportError as exc:
-            raise ImportError("Install with: pip install contextpress[compress]") from exc
+            raise ImportError("Install with: pip install contpress[compress]") from exc
         self._compressor = PromptCompressor(*args, **kwargs)
 
     def compress(

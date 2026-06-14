@@ -1,22 +1,22 @@
-# contextpress
+# contpress
 
 <p align="center">
   A practical Python toolkit for making every LLM token count.
 </p>
 
 <p align="center">
-  <img width="256" height="256" alt="contextpress Logo" src="https://github.com/Arkay92/ContextPress/blob/main/contextpress.png?raw=true" />
+  <img width="256" height="256" alt="contpress Logo" src="https://github.com/Arkay92/ContextPress/blob/main/contpress.png?raw=true" />
 </p>
 
 <p align="center">
   <a href="https://github.com/Arkay92/ContextPress/actions/workflows/publish.yml"><img alt="Publish" src="https://github.com/Arkay92/ContextPress/actions/workflows/publish.yml/badge.svg" /></a>
-  <a href="https://pypi.org/project/contextpress/"><img alt="PyPI" src="https://img.shields.io/pypi/v/contextpress.svg" /></a>
-  <img alt="Python" src="https://img.shields.io/pypi/pyversions/contextpress.svg" />
-  <img alt="Downloads" src="https://img.shields.io/pypi/dm/contextpress.svg" />
-  <img alt="License" src="https://img.shields.io/pypi/l/contextpress.svg" />
+  <a href="https://pypi.org/project/contpress/"><img alt="PyPI" src="https://img.shields.io/pypi/v/contpress.svg" /></a>
+  <img alt="Python" src="https://img.shields.io/pypi/pyversions/contpress.svg" />
+  <img alt="Downloads" src="https://img.shields.io/pypi/dm/contpress.svg" />
+  <img alt="License" src="https://img.shields.io/pypi/l/contpress.svg" />
 </p>
 
-**contextpress** combines:
+**contpress** combines:
 
 - **Token counting and trimming** with model-aware encodings.
 - **Token budget enforcement** for input, output reserve, system prompts, tools, RAG context, and history.
@@ -51,7 +51,7 @@ Task, instructions, context, tools, and history
   -> Feed the result to any LLM client
 ```
 
-`contextpress` is designed to reduce token usage before a request is sent:
+`contpress` is designed to reduce token usage before a request is sent:
 
 - **Oversized prompts** from untrimmed documents, code, logs, and retrieved chunks.
 - **Messy repeated instructions** that waste tokens and reduce prompt clarity.
@@ -97,31 +97,31 @@ OptimizedPrompt
 ## Install
 
 ```bash
-pip install contextpress
+pip install contpress
 ```
 
 For LLMLingua prompt compression:
 
 ```bash
-pip install "contextpress[compress]"
+pip install "contpress[compress]"
 ```
 
 For semantic cache support:
 
 ```bash
-pip install "contextpress[semantic]"
+pip install "contpress[semantic]"
 ```
 
 For RAG ecosystem integrations:
 
 ```bash
-pip install "contextpress[rag]"
+pip install "contpress[rag]"
 ```
 
 For all optional integrations:
 
 ```bash
-pip install "contextpress[all]"
+pip install "contpress[all]"
 ```
 
 For development:
@@ -139,7 +139,7 @@ python -m build
 ### Optimize a Prompt
 
 ```python
-from contextpress import ContextPress
+from contpress import ContextPress
 
 cp = ContextPress(
     model="gpt-4o-mini",
@@ -164,7 +164,7 @@ print(optimized.report)
 ### Token Counting
 
 ```python
-from contextpress import TokenCounter
+from contpress import TokenCounter
 
 counter = TokenCounter(model="gpt-4o-mini")
 
@@ -176,7 +176,7 @@ print(counter.trim("long text", max_tokens=1000))
 ### Usage Report
 
 ```python
-from contextpress import UsageReport
+from contpress import UsageReport
 
 report = UsageReport(
     model="gpt-4o-mini",
@@ -196,31 +196,31 @@ print(report.summary())
 Count tokens in a file:
 
 ```bash
-contextpress count README.md --model gpt-4o-mini
+contpress count README.md --model gpt-4o-mini
 ```
 
 Trim a file to a maximum token count:
 
 ```bash
-contextpress trim prompt.txt --max-tokens 2000
+contpress trim prompt.txt --max-tokens 2000
 ```
 
 Compress a prompt:
 
 ```bash
-contextpress compress prompt.txt --target-tokens 1000
+contpress compress prompt.txt --target-tokens 1000
 ```
 
 Compact JSON:
 
 ```bash
-contextpress compact data.json
+contpress compact data.json
 ```
 
 Generate a budget report:
 
 ```bash
-contextpress report prompt.txt --budget 8000
+contpress report prompt.txt --budget 8000
 ```
 
 ---
@@ -232,7 +232,7 @@ contextpress report prompt.txt --budget 8000
 Count, fit-check, and trim text using the target model encoding:
 
 ```python
-from contextpress import TokenCounter
+from contpress import TokenCounter
 
 counter = TokenCounter(model="gpt-4o-mini")
 tokens = counter.count(prompt)
@@ -243,7 +243,7 @@ tokens = counter.count(prompt)
 Reserve output tokens and account for system prompt or tool schema overhead:
 
 ```python
-from contextpress import TokenBudget
+from contpress import TokenBudget
 
 budget = TokenBudget(
     model="gpt-4o-mini",
@@ -260,7 +260,7 @@ print(budget.input_budget)
 Build repeatable prompt blocks without verbose formatting:
 
 ```python
-from contextpress import PromptBuilder
+from contpress import PromptBuilder
 
 prompt = (
     PromptBuilder()
@@ -278,7 +278,7 @@ prompt = (
 Reduce JSON and tabular context before sending it to an LLM:
 
 ```python
-from contextpress import compact_json, compact_table, drop_nulls, shorten_keys
+from contpress import compact_json, compact_table, drop_nulls, shorten_keys
 
 payload = drop_nulls(data)
 payload = shorten_keys(payload, {"description": "d", "priority": "p"})
@@ -291,7 +291,7 @@ Dependency-free compression keeps query-relevant sentences and preserves useful
 signals such as numbers, URLs, headings, code identifiers, and requirements:
 
 ```python
-from contextpress import ExtractiveCompressor
+from contpress import ExtractiveCompressor
 
 short = ExtractiveCompressor().compress(
     text=long_context,
@@ -305,7 +305,7 @@ short = ExtractiveCompressor().compress(
 Use Microsoft LLMLingua when you install the compression extra:
 
 ```python
-from contextpress.compressors import LLMLinguaCompressor
+from contpress.compressors import LLMLinguaCompressor
 
 compressed = LLMLinguaCompressor().compress(
     prompt=long_prompt,
@@ -323,7 +323,7 @@ gains for shorter prompts or mismatched model and hardware conditions.
 Filter retrieved chunks before building the final prompt:
 
 ```python
-from contextpress import ContextFilter
+from contpress import ContextFilter
 
 filtered = ContextFilter(model="gpt-4o-mini").filter(
     query=user_question,
@@ -338,7 +338,7 @@ Keep system prompts, recent messages, relevant history, constraints, decisions,
 preferences, and file names:
 
 ```python
-from contextpress import ConversationPruner
+from contpress import ConversationPruner
 
 messages = ConversationPruner().prune(
     messages=chat_history,
@@ -352,7 +352,7 @@ messages = ConversationPruner().prune(
 Generate compact response contracts:
 
 ```python
-from contextpress import OutputContract
+from contpress import OutputContract
 
 contract = OutputContract(
     fields={"summary": "one sentence", "risks": "short list"},
@@ -364,7 +364,7 @@ contract = OutputContract(
 Group stable and volatile blocks to improve prompt-cache friendliness:
 
 ```python
-from contextpress import PromptCacheLayout
+from contpress import PromptCacheLayout
 
 prompt = (
     PromptCacheLayout()
@@ -380,7 +380,7 @@ prompt = (
 Compact tool schemas and agent traces before placing them in context:
 
 ```python
-from contextpress import AgentTraceCompactor, ToolSchemaCompactor
+from contpress import AgentTraceCompactor, ToolSchemaCompactor
 
 compact_schema = ToolSchemaCompactor(drop_descriptions=True).compact(tool_schema)
 compact_trace = AgentTraceCompactor().compact(events)
@@ -393,7 +393,7 @@ compact_trace = AgentTraceCompactor().compact(events)
 Tune prompt budgets with `TokenBudget`:
 
 ```python
-from contextpress import TokenBudget
+from contpress import TokenBudget
 
 budget = TokenBudget(
     model="gpt-4o-mini",
@@ -409,7 +409,7 @@ budget = TokenBudget(
 Tune optimization with `ContextPress`:
 
 ```python
-from contextpress import ContextPress
+from contpress import ContextPress
 
 cp = ContextPress(
     model="gpt-4o-mini",
@@ -424,7 +424,7 @@ cp = ContextPress(
 ## Examples
 
 ```python
-from contextpress import ContextPress
+from contpress import ContextPress
 
 cp = ContextPress(
     model="gpt-4o-mini",
@@ -446,8 +446,8 @@ print(optimized.report)
 ```
 
 ```bash
-contextpress count README.md
-contextpress report prompt.txt --budget 8000
+contpress count README.md
+contpress report prompt.txt --budget 8000
 ```
 
 ---
@@ -455,7 +455,7 @@ contextpress report prompt.txt --budget 8000
 ## Project Structure
 
 ```text
-src/contextpress/
+src/contpress/
   __init__.py              # Public API
   core.py                  # ContextPress and OptimizedPrompt
   tokenizer.py             # TokenCounter
@@ -479,7 +479,7 @@ tests/
     ci.yml                 # Tests and package build
     publish.yml            # PyPI publishing workflow
 pyproject.toml             # Project metadata and dependencies
-contextpress.png           # Project logo
+contpress.png           # Project logo
 ```
 
 ---
@@ -512,11 +512,17 @@ with this GitHub repository, the `pypi` environment, and the
 
 Trusted publishing settings on PyPI must match:
 
-- PyPI project name: `contextpress`
+- PyPI project name: `contpress`
 - GitHub owner: `Arkay92`
 - GitHub repository: `ContextPress`
 - Workflow name: `publish.yml`
 - Environment name: `pypi`
+
+If publishing fails with `403 Invalid API Token: OIDC scoped token is not valid
+for project 'contpress'`, the workflow ran correctly but PyPI did not accept
+the trusted publisher for that project. Delete and recreate the trusted publisher
+on PyPI with the exact values above, including the `pypi` environment, then push
+a new version tag such as `v0.1.5`.
 
 ---
 
@@ -535,15 +541,15 @@ budget, and the optimization behavior you expected.
 
 ## Citation
 
-If you use contextpress in research, please cite:
+If you use contpress in research, please cite:
 
 ```bibtex
 @software{contextpress2026,
-  title={contextpress: A Practical Python Toolkit for Making Every LLM Token Count},
+  title={contpress: A Practical Python Toolkit for Making Every LLM Token Count},
   author={Arkay92},
   url={https://github.com/Arkay92/ContextPress},
   year={2026},
-  version={v0.1.4},
+  version={v0.1.5},
 }
 ```
 

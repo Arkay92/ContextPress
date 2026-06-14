@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from contextpress.tokenizer import TokenCounter
+from contpress.tokenizer import TokenCounter
 
 
 def chunk_text(text: str, max_tokens: int = 500, model: str = "gpt-4o-mini") -> list[str]:

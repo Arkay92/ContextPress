@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 
-from contextpress.tokenizer import TokenCounter
+from contpress.tokenizer import TokenCounter
 
 
 MODEL_CONTEXT_WINDOWS = {

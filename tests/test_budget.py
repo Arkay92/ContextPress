@@ -1,4 +1,4 @@
-from contextpress import TokenBudget
+from contpress import TokenBudget
 
 
 def test_budget_reserves_output_and_overhead():

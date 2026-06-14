@@ -3,8 +3,8 @@ requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [project]
-name = "contextpress"
-version = "v0.1.4"
+name = "contpress"
+version = "v0.1.5"
 description = "Reduce LLM token usage with token counting, prompt compression, caching, and context filtering."
 readme = "README.md"
 requires-python = ">=3.10"
@@ -32,10 +32,10 @@ all = [
 dev = ["build>=1.0", "pytest>=8.0"]
 
 [project.scripts]
-contextpress = "contextpress.cli:main"
+contpress = "contpress.cli:main"
 
 [tool.hatch.build.targets.wheel]
-packages = ["src/contextpress"]
+packages = ["src/contpress"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

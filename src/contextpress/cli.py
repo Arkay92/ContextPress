@@ -6,10 +6,10 @@ from pathlib import Path
 
 from rich.console import Console
 
-from contextpress.core import ContextPress
-from contextpress.formatters import compact_json
-from contextpress.reports import UsageReport
-from contextpress.tokenizer import TokenCounter
+from contpress.core import ContextPress
+from contpress.formatters import compact_json
+from contpress.reports import UsageReport
+from contpress.tokenizer import TokenCounter
 
 
 console = Console()
@@ -20,7 +20,7 @@ def _read(path: str) -> str:
 
 
 def main(argv: list[str] | None = None) -> int:
-    parser = argparse.ArgumentParser(prog="contextpress")
+    parser = argparse.ArgumentParser(prog="contpress")
     sub = parser.add_subparsers(dest="command", required=True)
 
     count = sub.add_parser("count")

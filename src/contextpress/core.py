@@ -4,13 +4,13 @@ from collections.abc import Iterable, Sequence
 from dataclasses import dataclass
 from typing import Any
 
-from contextpress.budgets import TokenBudget
-from contextpress.builder import PromptBuilder
-from contextpress.compressors.extractive import ExtractiveCompressor
-from contextpress.formatters import compact_json
-from contextpress.rag.filter import ContextFilter
-from contextpress.reports import UsageReport
-from contextpress.tokenizer import TokenCounter
+from contpress.budgets import TokenBudget
+from contpress.builder import PromptBuilder
+from contpress.compressors.extractive import ExtractiveCompressor
+from contpress.formatters import compact_json
+from contpress.rag.filter import ContextFilter
+from contpress.reports import UsageReport
+from contpress.tokenizer import TokenCounter
 
 
 @dataclass(slots=True)

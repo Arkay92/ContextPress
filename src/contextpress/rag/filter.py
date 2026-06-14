@@ -3,9 +3,9 @@ from __future__ import annotations
 from collections.abc import Sequence
 from dataclasses import dataclass, field
 
-from contextpress.compressors.extractive import ExtractiveCompressor
-from contextpress.rag.rerank import keyword_rerank
-from contextpress.tokenizer import TokenCounter
+from contpress.compressors.extractive import ExtractiveCompressor
+from contpress.rag.rerank import keyword_rerank
+from contpress.tokenizer import TokenCounter
 
 
 @dataclass(slots=True)
@@ -42,4 +42,4 @@ class ContextFilter:
         return "\n\n".join(chosen)
 
     def _require_extra(self, extra: str) -> None:
-        raise ImportError(f"Install with: pip install contextpress[{extra}]")
+        raise ImportError(f"Install with: pip install contpress[{extra}]")

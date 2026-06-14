@@ -1,4 +1,4 @@
-from contextpress import ContextFilter, ExtractiveCompressor
+from contpress import ContextFilter, ExtractiveCompressor
 
 
 def test_extractive_compressor_prefers_relevant_sentences():

@@ -7,7 +7,7 @@ from typing import Any
 
 @dataclass
 class ExactPromptCache:
-    namespace: str = "contextpress"
+    namespace: str = "contpress"
     _data: dict[str, Any] = field(default_factory=dict)
 
     def lookup(self, prompt: str) -> Any:

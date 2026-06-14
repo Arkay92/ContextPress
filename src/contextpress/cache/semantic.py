@@ -8,5 +8,5 @@ class SemanticCache:
             import faiss  # noqa: F401
             from sentence_transformers import SentenceTransformer  # noqa: F401
         except ImportError as exc:
-            raise ImportError("Install with: pip install contextpress[semantic]") from exc
+            raise ImportError("Install with: pip install contpress[semantic]") from exc
         raise NotImplementedError("SemanticCache requires a vector store implementation; install extras and configure a store.")

@@ -5,7 +5,7 @@ from collections.abc import Sequence
 from dataclasses import dataclass, field
 from typing import Any
 
-from contextpress.tokenizer import TokenCounter
+from contpress.tokenizer import TokenCounter
 
 
 FILLER_RE = re.compile(r"^(thanks|thank you|ok|okay|cool|great|sounds good)[.! ]*$", re.IGNORECASE)

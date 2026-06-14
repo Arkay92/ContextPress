@@ -3,7 +3,7 @@ from __future__ import annotations
 import difflib
 from dataclasses import dataclass
 
-from contextpress.tokenizer import TokenCounter
+from contpress.tokenizer import TokenCounter
 
 
 @dataclass(slots=True)

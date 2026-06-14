@@ -1,4 +1,4 @@
-from contextpress import TokenCounter
+from contpress import TokenCounter
 
 
 def test_token_counter_counts_and_trims():

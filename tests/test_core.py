@@ -1,4 +1,4 @@
-from contextpress import ContextPress
+from contpress import ContextPress
 
 
 def test_contextpress_optimizes_and_reports():

@@ -4,7 +4,7 @@ from collections.abc import Mapping, Sequence
 from dataclasses import dataclass
 from typing import Any
 
-from contextpress.formatters import compact_json, drop_nulls
+from contpress.formatters import compact_json, drop_nulls
 
 
 @dataclass(slots=True)

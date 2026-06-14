@@ -3,7 +3,7 @@ from __future__ import annotations
 import re
 from dataclasses import dataclass, field
 
-from contextpress.tokenizer import TokenCounter
+from contpress.tokenizer import TokenCounter
 
 
 _SENTENCE_RE = re.compile(r"(?<=[.!?])\s+|\n+")

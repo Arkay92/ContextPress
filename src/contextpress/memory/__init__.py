@@ -1,3 +1,3 @@
-from contextpress.memory.conversation import ConversationPruner
+from contpress.memory.conversation import ConversationPruner
 
 __all__ = ["ConversationPruner"]

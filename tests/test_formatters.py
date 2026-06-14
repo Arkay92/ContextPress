@@ -1,4 +1,4 @@
-from contextpress import compact_json, compact_table, drop_nulls, json_to_csv_if_tabular, shorten_keys
+from contpress import compact_json, compact_table, drop_nulls, json_to_csv_if_tabular, shorten_keys
 
 
 def test_compact_json_and_table_helpers():
