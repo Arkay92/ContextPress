@@ -1,4 +1,4 @@
-# contpress
+# ContextPress
 
 <p align="center">
   A practical Python toolkit for making every LLM token count.
@@ -16,7 +16,7 @@
   <img alt="License" src="https://img.shields.io/pypi/l/contpress.svg" />
 </p>
 
-**contpress** combines:
+**ContextPress** combines:
 
 - **Token counting and trimming** with model-aware encodings.
 - **Token budget enforcement** for input, output reserve, system prompts, tools, RAG context, and history.
@@ -51,7 +51,7 @@ Task, instructions, context, tools, and history
   -> Feed the result to any LLM client
 ```
 
-`contpress` is designed to reduce token usage before a request is sent:
+`ContextPress` is designed to reduce token usage before a request is sent:
 
 - **Oversized prompts** from untrimmed documents, code, logs, and retrieved chunks.
 - **Messy repeated instructions** that waste tokens and reduce prompt clarity.
@@ -499,33 +499,6 @@ python -m build
 
 ---
 
-## Publishing
-
-GitHub Actions includes:
-
-- `CI`: runs tests and builds the package on pushes and pull requests.
-- `Publish to PyPI`: builds, checks, and publishes distributions when a `v*` tag is pushed.
-
-The publish workflow uses PyPI trusted publishing. Configure the PyPI project
-with this GitHub repository, the `pypi` environment, and the
-`.github/workflows/publish.yml` workflow before pushing a version tag.
-
-Trusted publishing settings on PyPI must match:
-
-- PyPI project name: `contpress`
-- GitHub owner: `Arkay92`
-- GitHub repository: `ContextPress`
-- Workflow name: `publish.yml`
-- Environment name: `pypi`
-
-If publishing fails with `403 Invalid API Token: OIDC scoped token is not valid
-for project 'contpress'`, the workflow ran correctly but PyPI did not accept
-the trusted publisher for that project. Delete and recreate the trusted publisher
-on PyPI with the exact values above, including the `pypi` environment, then push
-a new version tag such as `v0.1.5`.
-
----
-
 ## License
 
 MIT
@@ -541,15 +514,15 @@ budget, and the optimization behavior you expected.
 
 ## Citation
 
-If you use contpress in research, please cite:
+If you use ContextPress in research, please cite:
 
 ```bibtex
-@software{contpress2026,
-  title={contpress: A Practical Python Toolkit for Making Every LLM Token Count},
+@software{ContextPress2026,
+  title={ContextPress: A Practical Python Toolkit for Making Every LLM Token Count},
   author={Arkay92},
   url={https://github.com/Arkay92/ContextPress},
   year={2026},
-  version={v0.1.5},
+  version={0.2.0},
 }
 ```
 
