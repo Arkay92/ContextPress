@@ -522,7 +522,7 @@ If you use ContextPress in research, please cite:
   author={Arkay92},
   url={https://github.com/Arkay92/ContextPress},
   year={2026},
-  version={0.2.0},
+  version={0.2.1},
 }
 ```
 
