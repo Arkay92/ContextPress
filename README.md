@@ -510,6 +510,18 @@ The publish workflow uses PyPI trusted publishing. Configure the PyPI project
 with this GitHub repository, the `pypi` environment, and the
 `.github/workflows/publish.yml` workflow before publishing a release.
 
+Trusted publishing settings on PyPI must match:
+
+- PyPI project name: `contextpress`
+- GitHub owner: `Arkay92`
+- GitHub repository: `ContextPress`
+- Workflow name: `publish.yml`
+- Environment name: `pypi`
+
+Alternatively, add a GitHub secret named `PYPI_API_TOKEN`. Use a PyPI token that
+is valid for the `contextpress` project, or an account-scoped token for the first
+upload if the project does not exist yet.
+
 ---
 
 ## License

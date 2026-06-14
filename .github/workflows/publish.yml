@@ -16,6 +16,8 @@ jobs:
   publish:
     name: Build and publish
     runs-on: ubuntu-latest
+    env:
+      HAS_PYPI_TOKEN: ${{ secrets.PYPI_API_TOKEN != '' }}
     environment:
       name: pypi
       url: https://pypi.org/p/contextpress
@@ -41,5 +43,12 @@ jobs:
       - name: Build distributions
         run: python -m build
 
-      - name: Publish distributions to PyPI
+      - name: Publish distributions to PyPI with API token
+        if: env.HAS_PYPI_TOKEN == 'true'
+        uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          password: ${{ secrets.PYPI_API_TOKEN }}
+
+      - name: Publish distributions to PyPI with trusted publishing
+        if: env.HAS_PYPI_TOKEN != 'true'
         uses: pypa/gh-action-pypi-publish@release/v1
