@@ -1,0 +1,109 @@
+from __future__ import annotations
+
+from collections.abc import Iterable, Sequence
+from dataclasses import dataclass
+from typing import Any
+
+from contextpress.budgets import TokenBudget
+from contextpress.builder import PromptBuilder
+from contextpress.compressors.extractive import ExtractiveCompressor
+from contextpress.formatters import compact_json
+from contextpress.rag.filter import ContextFilter
+from contextpress.reports import UsageReport
+from contextpress.tokenizer import TokenCounter
+
+
+@dataclass(slots=True)
+class OptimizedPrompt:
+    text: str
+    report: dict[str, Any]
+
+
+class ContextPress:
+    def __init__(
+        self,
+        model: str = "gpt-4o-mini",
+        max_input_tokens: int = 4_000,
+        max_output_tokens: int | None = None,
+        reserve_output_tokens: int | None = None,
+        compression: str = "extractive",
+    ) -> None:
+        self.model = model
+        self.max_input_tokens = max_input_tokens
+        self.max_output_tokens = max_output_tokens if max_output_tokens is not None else reserve_output_tokens or 0
+        self.compression = compression
+        self.counter = TokenCounter(model)
+        self.budget = TokenBudget(
+            model=model,
+            max_input_tokens=max_input_tokens,
+            reserve_output_tokens=self.max_output_tokens,
+        )
+
+    def optimize(
+        self,
+        task: str,
+        context: str | Sequence[str] | dict[str, Any] | list[Any] = "",
+        instructions: Iterable[str] | None = None,
+        output: Iterable[str] | str | None = None,
+        role: str | None = None,
+    ) -> OptimizedPrompt:
+        methods: list[str] = []
+        original_context = self._stringify_context(context)
+        original_prompt = self._build_prompt(task, original_context, instructions, output, role)
+        original_tokens = self.counter.count(original_prompt)
+
+        context_budget = max(0, int(self.budget.input_budget * 0.75))
+        optimized_context = original_context
+        if isinstance(context, Sequence) and not isinstance(context, (str, bytes, dict)) and all(isinstance(item, str) for item in context):
+            optimized_context = ContextFilter(self.model).filter(task, list(context), max_tokens=context_budget)
+            methods.append("context_filter")
+        elif self.compression in {"extractive", "sentence_filter"} and not self.counter.fits(original_prompt, self.budget.input_budget):
+            optimized_context = ExtractiveCompressor(self.model).compress(original_context, query=task, max_tokens=context_budget)
+            methods.append("sentence_filter")
+
+        prompt = self._build_prompt(task, optimized_context, instructions, output, role)
+        methods.append("compact_format")
+        if not self.counter.fits(prompt, self.budget.input_budget):
+            prompt = self.counter.trim(prompt, self.budget.input_budget)
+            methods.append("trim")
+
+        optimized_tokens = self.counter.count(prompt)
+        report = UsageReport(
+            model=self.model,
+            input_tokens_before=original_tokens,
+            input_tokens_after=optimized_tokens,
+            output_tokens_limit=self.max_output_tokens,
+            methods=list(dict.fromkeys(methods)),
+        ).as_dict()
+        return OptimizedPrompt(text=prompt, report=report)
+
+    def _build_prompt(
+        self,
+        task: str,
+        context: str,
+        instructions: Iterable[str] | None,
+        output: Iterable[str] | str | None,
+        role: str | None,
+    ) -> str:
+        builder = PromptBuilder()
+        if role:
+            builder.role(role)
+        builder.task(task)
+        if instructions:
+            builder.instructions(instructions)
+        if context:
+            builder.context(context)
+        if output:
+            builder.output(output)
+        return builder.build()
+
+    def _stringify_context(self, context: str | Sequence[str] | dict[str, Any] | list[Any]) -> str:
+        if isinstance(context, str):
+            return context
+        if isinstance(context, dict):
+            return compact_json(context)
+        if isinstance(context, list) and (not context or not all(isinstance(item, str) for item in context)):
+            return compact_json(context)
+        if isinstance(context, Sequence):
+            return "\n\n".join(str(item) for item in context)
+        return str(context)
