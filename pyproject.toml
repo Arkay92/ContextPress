@@ -35,7 +35,7 @@ dev = ["build>=1.0", "pytest>=8.0"]
 contpress = "contpress.cli:main"
 
 [tool.hatch.build.targets.wheel]
-packages = ["src/contpress"]
+packages = ["src/contextpress"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

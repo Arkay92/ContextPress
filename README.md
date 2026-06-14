@@ -455,7 +455,7 @@ contpress report prompt.txt --budget 8000
 ## Project Structure
 
 ```text
-src/contpress/
+src/contextpress/
   __init__.py              # Public API
   core.py                  # ContextPress and OptimizedPrompt
   tokenizer.py             # TokenCounter
