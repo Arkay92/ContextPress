@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from collections.abc import Sequence
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 
 from contextpress.compressors.extractive import ExtractiveCompressor
 from contextpress.rag.rerank import keyword_rerank
@@ -12,6 +12,8 @@ from contextpress.tokenizer import TokenCounter
 class ContextFilter:
     model: str = "gpt-4o-mini"
     mode: str = "keyword"
+    counter: TokenCounter = field(init=False, repr=False)
+    compressor: ExtractiveCompressor = field(init=False, repr=False)
 
     def __post_init__(self) -> None:
         self.counter = TokenCounter(self.model)

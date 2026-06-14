@@ -1,7 +1,8 @@
 from __future__ import annotations
 
 import re
-from dataclasses import dataclass
+from dataclasses import dataclass, field
+from typing import Any
 
 
 class _RegexEncoding:
@@ -32,6 +33,7 @@ def _encoding_for_model(model: str):
 @dataclass(slots=True)
 class TokenCounter:
     model: str = "gpt-4o-mini"
+    encoding: Any = field(init=False, repr=False)
 
     def __post_init__(self) -> None:
         self.encoding = _encoding_for_model(self.model)

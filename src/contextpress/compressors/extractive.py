@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import re
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 
 from contextpress.tokenizer import TokenCounter
 
@@ -13,6 +13,7 @@ _WORD_RE = re.compile(r"[A-Za-z0-9_#./:-]+")
 @dataclass(slots=True)
 class ExtractiveCompressor:
     model: str = "gpt-4o-mini"
+    counter: TokenCounter = field(init=False, repr=False)
 
     def __post_init__(self) -> None:
         self.counter = TokenCounter(self.model)

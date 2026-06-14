@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import re
 from collections.abc import Sequence
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import Any
 
 from contextpress.tokenizer import TokenCounter
@@ -15,6 +15,7 @@ FILLER_RE = re.compile(r"^(thanks|thank you|ok|okay|cool|great|sounds good)[.! ]
 class ConversationPruner:
     model: str = "gpt-4o-mini"
     keep_latest: int = 6
+    counter: TokenCounter = field(init=False, repr=False)
 
     def __post_init__(self) -> None:
         self.counter = TokenCounter(self.model)

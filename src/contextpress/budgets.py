@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 
 from contextpress.tokenizer import TokenCounter
 
@@ -25,6 +25,7 @@ class TokenBudget:
     tool_schema: str = ""
     rag_context_ratio: float = 0.6
     history_ratio: float = 0.3
+    counter: TokenCounter = field(init=False, repr=False)
 
     def __post_init__(self) -> None:
         if self.reserve_output_tokens < 0:
