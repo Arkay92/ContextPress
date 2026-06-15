@@ -1,0 +1,1 @@
+{"ticket_id":"SUP-222","customer_id":"C-101","description":"Customer cannot reset password","priority":"high","notes":null,"actions":["verify email","send reset link"],"risk":"account takeover if identity is not checked"}

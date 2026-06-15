@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, field
+from importlib.util import find_spec
 
 from contpress.tokenizer import TokenCounter
 
@@ -112,3 +113,28 @@ def doctor_prompt(text: str, model: str = "gpt-4o-mini", budget: int = 8_000) ->
         )
 
     return DoctorReport(model=model, tokens=tokens, budget=budget, findings=findings)
+
+
+def install_health() -> str:
+    checks = {
+        "Base install": True,
+        "tiktoken": find_spec("tiktoken") is not None,
+        "rich": find_spec("rich") is not None,
+        "semantic extras": all(find_spec(name) is not None for name in ("sentence_transformers", "faiss", "diskcache", "numpy")),
+        "llmlingua extras": find_spec("llmlingua") is not None,
+        "rag extras": find_spec("langchain") is not None and find_spec("llama_index") is not None,
+    }
+    lines = ["ContextPress Doctor", "-------------------"]
+    for name, ok in checks.items():
+        lines.append(f"{name}: {'OK' if ok else 'missing'}")
+    missing = [name for name, ok in checks.items() if not ok and name.endswith("extras")]
+    if missing:
+        lines.append("")
+        lines.append("Suggestions:")
+        if "semantic extras" in missing:
+            lines.append('pip install "contpress[semantic]"')
+        if "llmlingua extras" in missing:
+            lines.append('pip install "contpress[compress]"')
+        if "rag extras" in missing:
+            lines.append('pip install "contpress[rag]"')
+    return "\n".join(lines)

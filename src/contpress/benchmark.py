@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 from pathlib import Path
+from time import perf_counter
 
 from contpress.core import ContextPress
 
@@ -12,6 +13,7 @@ class BenchmarkResult:
     average_original_tokens: float
     average_optimized_tokens: float
     average_reduction_percent: float
+    average_processing_time: float = 0.0
     reports: list[dict[str, object]] = field(default_factory=list)
 
     def as_dict(self) -> dict[str, object]:
@@ -20,6 +22,7 @@ class BenchmarkResult:
             "average_original_tokens": round(self.average_original_tokens, 1),
             "average_optimized_tokens": round(self.average_optimized_tokens, 1),
             "average_reduction_percent": round(self.average_reduction_percent, 1),
+            "average_processing_time": round(self.average_processing_time, 4),
             "reports": self.reports,
         }
 
@@ -30,6 +33,7 @@ class BenchmarkResult:
                 f"Average original tokens: {self.average_original_tokens:,.0f}",
                 f"Average optimized tokens: {self.average_optimized_tokens:,.0f}",
                 f"Average reduction: {self.average_reduction_percent:.1f}%",
+                f"Average processing time: {self.average_processing_time:.2f}s",
             ]
         )
 
@@ -48,10 +52,13 @@ def benchmark_path(
 
     cp = ContextPress(model=model, max_input_tokens=max_input_tokens)
     reports: list[dict[str, object]] = []
+    elapsed = 0.0
     for item in text_files:
         text = item.read_text(encoding="utf-8")
+        started = perf_counter()
         optimized = cp.optimize(task=task, context=text)
-        report = dict(optimized.report)
+        elapsed += perf_counter() - started
+        report = optimized.report.as_dict()
         report["file"] = str(item)
         reports.append(report)
 
@@ -64,5 +71,6 @@ def benchmark_path(
         average_original_tokens=original / count,
         average_optimized_tokens=optimized_tokens / count,
         average_reduction_percent=reduction,
+        average_processing_time=elapsed / count,
         reports=reports,
     )

@@ -1,0 +1,3 @@
+Tool call search_logs(query="ERR_CARD_DECLINED"). Result: 42 matching events.
+Decision: filter to account A-104. Tool call fetch_ticket(id="SUP-1042").
+Final: retry payment only after user confirms billing ZIP.

@@ -1,0 +1,3 @@
+Retrieved chunk 1: marketing homepage content unrelated to billing.
+Retrieved chunk 2: account A-901 failed invoice payment with ERR_BANK_TIMEOUT.
+Retrieved chunk 3: account A-901 requires manual retry after bank gateway recovers.

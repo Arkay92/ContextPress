@@ -1,0 +1,3 @@
+Support ticket ID SUP-1042. User reported failed checkout at 2026-06-14 09:12.
+Error ERR_CARD_DECLINED appeared twice. Agent retried payment and asked user to
+confirm billing ZIP code. Risk: duplicate charge if retry is repeated.

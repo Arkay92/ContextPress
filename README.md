@@ -24,16 +24,18 @@
 **ContextPress** combines:
 
 - **Token counting and trimming** with model-aware encodings.
+- **Exact and semantic caching** to reduce repeated model calls.
+- **Provider-aware cost estimation** with bundled pricing estimates.
 - **Token budget enforcement** for input, output reserve, system prompts, tools, RAG context, and history.
 - **Compact prompt building** for consistent, low-waste prompt blocks.
 - **Dependency-free extractive compression** for safe first-pass prompt reduction.
+- **Compression profiles** for safe, balanced, aggressive, code, RAG, and legal prompts.
 - **RAG context filtering** with keyword and sentence relevance modes.
 - **Compact JSON, CSV, and table formatting** for reducing structured-data tokens.
 - **Conversation memory pruning** that keeps system prompts, recent messages, decisions, constraints, and relevant context.
 - **Output contract generation** for concise response schemas.
 - **Prompt cache-aware formatting** to keep stable prompt blocks grouped.
-- **Prompt and response caching surfaces** including exact cache and optional semantic cache support.
-- **Usage reports** with original tokens, optimized tokens, saved tokens, ratios, and methods.
+- **Enhanced usage reports** with token savings, estimated cost savings, cache status, warnings, and truncation notes.
 - **Optional dependencies** so the base package stays lightweight.
 
 ---
@@ -66,6 +68,9 @@ Methods: compact_layout, extractive_compression, budget_trim
 
 That is the core job: shrink the prompt before the model call, while reporting
 what changed.
+
+ContextPress v0.4.0 also helps reduce repeated model calls through exact and
+semantic caching, and estimate savings with provider-aware pricing.
 
 ---
 
@@ -317,6 +322,28 @@ Generate a budget report:
 contpress report prompt.txt --budget 8000
 ```
 
+Estimate before/after cost:
+
+```bash
+contpress cost before.txt after.txt --provider openai --model gpt-4o-mini --output-tokens 500
+contpress pricing list
+```
+
+Manage exact cache:
+
+```bash
+contpress cache stats
+contpress cache list
+contpress cache clear
+```
+
+Use semantic cache:
+
+```bash
+contpress semantic-cache add question.txt answer.txt --provider openai --model gpt-4o-mini
+contpress semantic-cache lookup "How do I reduce tokens?"
+```
+
 Show what optimization removed or changed:
 
 ```bash
@@ -335,10 +362,22 @@ Check a prompt for budget and compression risks:
 contpress doctor prompt.txt --budget 8000
 ```
 
+Check install health:
+
+```bash
+contpress doctor
+```
+
 Estimate provider/model cost:
 
 ```bash
 contpress estimate-cost prompt.txt --provider openai --model gpt-4o-mini --output-tokens 500
+```
+
+Inspect prompt cache layout:
+
+```bash
+contpress cache-layout prompt.txt
 ```
 
 ---
@@ -522,6 +561,37 @@ compact_schema = ToolSchemaCompactor(drop_descriptions=True).compact(tool_schema
 compact_trace = AgentTraceCompactor().compact(events)
 ```
 
+### 12. **Caching and Cost Control**
+
+```python
+from contpress.cache import ExactPromptCache
+from contpress import CostEstimator
+
+cache = ExactPromptCache(path=".contpress-cache", ttl_seconds=86400)
+key = cache.make_key(model="gpt-4o-mini", prompt=prompt, temperature=0)
+cached = cache.get(key)
+
+report = CostEstimator("openai", "gpt-4o-mini").estimate(
+    input_tokens_before=12000,
+    input_tokens_after=3500,
+    output_tokens=500,
+)
+```
+
+### 13. **Prompt Diff and Cache Layout**
+
+```python
+from contpress import CacheAwarePrompt, PromptDiff
+
+prompt = CacheAwarePrompt(
+    stable=["system rules", "tool schema"],
+    dynamic=["current request", "retrieved context"],
+).build()
+
+diff = PromptDiff.compare(original, optimized)
+print(diff.to_markdown())
+```
+
 ---
 
 ## Configuration
@@ -596,7 +666,9 @@ src/contpress/
   benchmark.py             # Folder/file benchmark helpers
   core.py                  # ContextPress and OptimizedPrompt
   costs.py                 # Provider/model cost estimates
+  diff.py                  # Prompt diff reports
   doctor.py                # Prompt budget and risk checks
+  profiles.py              # Compression profiles
   tokenizer.py             # TokenCounter
   budgets.py               # TokenBudget
   builder.py               # PromptBuilder
@@ -611,6 +683,8 @@ src/contpress/
   rag/                     # Chunking, reranking, context filtering
   cache/                   # Exact cache, semantic cache surface, stores
   memory/                  # Conversation pruning and summarization
+  pricing/
+    models.json            # Bundled provider/model pricing estimates
 tests/
   test_*.py                # Unit tests
 docs/
@@ -623,6 +697,7 @@ docs/
     publish.yml            # PyPI publishing workflow
 CHANGELOG.md               # Release history
 pyproject.toml             # Project metadata and dependencies
+examples/                  # Provider examples and benchmark prompts
 contextpress.png           # Project logo
 ```
 
@@ -666,7 +741,7 @@ If you use ContextPress in research, please cite:
   author={Arkay92},
   url={https://github.com/Arkay92/ContextPress},
   year={2026},
-  version={0.3.0},
+  version={0.4.0},
 }
 ```
 

@@ -1,17 +1,19 @@
 from __future__ import annotations
 
 import argparse
-import difflib
 import json
 from pathlib import Path
 
 from rich.console import Console
 
 from contpress.benchmark import benchmark_path
+from contpress.cache import ExactPromptCache, SemanticCache
 from contpress.core import ContextPress
-from contpress.costs import estimate_cost
-from contpress.doctor import doctor_prompt
+from contpress.costs import CostEstimator, PricingRegistry, estimate_cost
+from contpress.diff import PromptDiff
+from contpress.doctor import doctor_prompt, install_health
 from contpress.formatters import compact_json
+from contpress.prompt_cache import cache_layout_report
 from contpress.reports import UsageReport
 from contpress.tokenizer import TokenCounter
 
@@ -42,6 +44,7 @@ def main(argv: list[str] | None = None) -> int:
     compress.add_argument("--model", default="gpt-4o-mini")
     compress.add_argument("--target-tokens", type=int, default=1_000)
     compress.add_argument("--task", default="")
+    compress.add_argument("--profile", default="balanced")
 
     compact = sub.add_parser("compact")
     compact.add_argument("file")
@@ -52,10 +55,12 @@ def main(argv: list[str] | None = None) -> int:
     report.add_argument("--budget", type=int, default=8_000)
 
     diff = sub.add_parser("diff")
-    diff.add_argument("file")
+    diff.add_argument("original")
+    diff.add_argument("optimized", nargs="?")
     diff.add_argument("--model", default="gpt-4o-mini")
     diff.add_argument("--target-tokens", type=int, default=1_000)
     diff.add_argument("--task", default="Compress this prompt.")
+    diff.add_argument("--profile", default="balanced")
 
     benchmark = sub.add_parser("benchmark")
     benchmark.add_argument("path")
@@ -78,6 +83,46 @@ def main(argv: list[str] | None = None) -> int:
     estimate.add_argument("--output-tokens", type=int, default=0)
     estimate.add_argument("--json", action="store_true")
 
+    cost = sub.add_parser("cost")
+    cost.add_argument("before")
+    cost.add_argument("after", nargs="?")
+    cost.add_argument("--provider", required=True)
+    cost.add_argument("--model", required=True)
+    cost.add_argument("--output-tokens", type=int, default=0)
+    cost.add_argument("--json", action="store_true")
+
+    pricing = sub.add_parser("pricing")
+    pricing_sub = pricing.add_subparsers(dest="pricing_command", required=True)
+    pricing_sub.add_parser("list")
+
+    cache = sub.add_parser("cache")
+    cache.add_argument("--path", default=".contpress-cache")
+    cache_sub = cache.add_subparsers(dest="cache_command", required=True)
+    cache_sub.add_parser("stats")
+    cache_sub.add_parser("clear")
+    cache_sub.add_parser("list")
+
+    semantic = sub.add_parser("semantic-cache")
+    semantic.add_argument("--path", default=".contpress-semantic-cache")
+    semantic.add_argument("--threshold", type=float, default=0.88)
+    semantic_sub = semantic.add_subparsers(dest="semantic_command", required=True)
+    semantic_add = semantic_sub.add_parser("add")
+    semantic_add.add_argument("question_file")
+    semantic_add.add_argument("answer_file")
+    semantic_add.add_argument("--provider")
+    semantic_add.add_argument("--model")
+    semantic_lookup = semantic_sub.add_parser("lookup")
+    semantic_lookup.add_argument("query")
+    semantic_lookup.add_argument("--provider")
+    semantic_lookup.add_argument("--model")
+    semantic_sub.add_parser("stats")
+    semantic_sub.add_parser("clear")
+
+    layout = sub.add_parser("cache-layout")
+    layout.add_argument("file")
+    layout.add_argument("--model", default="gpt-4o-mini")
+    layout.add_argument("--json", action="store_true")
+
     args = parser.parse_args(argv)
 
     if args.command == "count":
@@ -94,7 +139,7 @@ def main(argv: list[str] | None = None) -> int:
         return 0
 
     if args.command == "compress":
-        cp = ContextPress(model=args.model, max_input_tokens=args.target_tokens)
+        cp = ContextPress(model=args.model, max_input_tokens=args.target_tokens, compression_profile=args.profile)
         console.print(cp.optimize(task=args.task or "Compress this prompt.", context=_read(args.file)).text)
         return 0
 
@@ -107,39 +152,29 @@ def main(argv: list[str] | None = None) -> int:
         text = _read(args.file)
         before = counter.count(text)
         after = min(before, args.budget)
-        console.print(UsageReport(args.model, before, after).summary())
+        console.print(UsageReport(args.model, before, after).to_markdown())
         return 0
 
     if args.command == "diff":
-        text = _read(args.file)
-        cp = ContextPress(model=args.model, max_input_tokens=args.target_tokens)
-        optimized = cp.optimize(task=args.task, context=text)
-        console.print(
-            "\n".join(
-                difflib.unified_diff(
-                    text.splitlines(),
-                    optimized.text.splitlines(),
-                    fromfile=args.file,
-                    tofile="optimized",
-                    lineterm="",
-                )
-            )
-        )
+        original = _read(args.original)
+        if args.optimized:
+            optimized = _read(args.optimized)
+        else:
+            cp = ContextPress(model=args.model, max_input_tokens=args.target_tokens, compression_profile=args.profile)
+            optimized = cp.optimize(task=args.task, context=original).text
+        console.print(PromptDiff.compare(original, optimized).to_markdown())
         return 0
 
     if args.command == "benchmark":
-        result = benchmark_path(
-            args.path,
-            model=args.model,
-            max_input_tokens=args.max_input_tokens,
-            task=args.task,
-        )
+        result = benchmark_path(args.path, model=args.model, max_input_tokens=args.max_input_tokens, task=args.task)
         console.print(json.dumps(result.as_dict(), indent=2) if args.json else result.summary())
         return 0
 
     if args.command == "doctor":
-        text = _read(args.file) if args.file else ""
-        result = doctor_prompt(text, model=args.model, budget=args.budget)
+        if not args.file:
+            console.print(install_health())
+            return 0
+        result = doctor_prompt(_read(args.file), model=args.model, budget=args.budget)
         console.print(json.dumps(result.as_dict(), indent=2) if args.json else result.summary())
         return 0
 
@@ -151,6 +186,51 @@ def main(argv: list[str] | None = None) -> int:
             input_tokens = TokenCounter(args.model).count(_read(args.file))
         result = estimate_cost(args.provider, args.model, input_tokens, args.output_tokens)
         console.print(json.dumps(result.as_dict(), indent=2) if args.json else result.summary())
+        return 0
+
+    if args.command == "cost":
+        counter = TokenCounter(args.model)
+        before = counter.count(_read(args.before))
+        after = counter.count(_read(args.after)) if args.after else before
+        result = CostEstimator(args.provider, args.model).estimate(before, after, args.output_tokens)
+        console.print(json.dumps(result.as_dict(), indent=2) if args.json else result.summary())
+        return 0
+
+    if args.command == "pricing":
+        console.print(json.dumps(PricingRegistry().list(), indent=2))
+        return 0
+
+    if args.command == "cache":
+        cache_obj = ExactPromptCache(path=args.path)
+        if args.cache_command == "stats":
+            console.print(json.dumps(cache_obj.stats().as_dict(), indent=2))
+        elif args.cache_command == "clear":
+            console.print(f"Cleared {cache_obj.clear()} cache files.")
+        elif args.cache_command == "list":
+            console.print(json.dumps(cache_obj.list(), indent=2))
+        return 0
+
+    if args.command == "semantic-cache":
+        semantic_obj = SemanticCache(path=args.path, similarity_threshold=args.threshold)
+        if args.semantic_command == "add":
+            semantic_obj.add(
+                query=_read(args.question_file),
+                answer=_read(args.answer_file),
+                metadata={"provider": args.provider, "model": args.model},
+            )
+            console.print("Added semantic cache entry.")
+        elif args.semantic_command == "lookup":
+            hit = semantic_obj.lookup(args.query, provider=args.provider, model=args.model)
+            console.print(json.dumps(hit.as_dict(), indent=2) if hit else "No semantic cache hit.")
+        elif args.semantic_command == "stats":
+            console.print(json.dumps(semantic_obj.stats(), indent=2))
+        elif args.semantic_command == "clear":
+            console.print(f"Cleared {semantic_obj.clear()} semantic cache entries.")
+        return 0
+
+    if args.command == "cache-layout":
+        result = cache_layout_report(_read(args.file), model=args.model)
+        console.print(json.dumps(result.as_dict(), indent=2) if args.json else "\n".join(f"{k}: {v}" for k, v in result.as_dict().items()))
         return 0
 
     return 1

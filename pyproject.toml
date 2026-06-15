@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "contpress"
-version = "0.3.0"
+version = "0.4.0"
 description = "Reduce LLM token usage with token counting, prompt compression, caching, and context filtering."
 readme = "README.md"
 requires-python = ">=3.10"
@@ -18,13 +18,14 @@ dependencies = [
 
 [project.optional-dependencies]
 compress = ["llmlingua"]
-semantic = ["sentence-transformers", "faiss-cpu", "diskcache"]
+semantic = ["sentence-transformers", "faiss-cpu", "diskcache", "numpy"]
 rag = ["langchain", "langchain-community", "llama-index"]
 all = [
     "llmlingua",
     "sentence-transformers",
     "faiss-cpu",
     "diskcache",
+    "numpy",
     "langchain",
     "langchain-community",
     "llama-index",
@@ -36,6 +37,9 @@ contpress = "contpress.cli:main"
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/contpress"]
+
+[tool.hatch.build.targets.wheel.force-include]
+"src/contpress/pricing/models.json" = "contpress/pricing/models.json"
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
