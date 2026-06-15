@@ -16,6 +16,11 @@
   <img alt="License" src="https://img.shields.io/pypi/l/contpress.svg" />
 </p>
 
+> **Package name:** `contpress`  
+> **Project name:** ContextPress  
+> **Install:** `pip install contpress`  
+> **Import:** `from contpress import ContextPress`
+
 **ContextPress** combines:
 
 - **Token counting and trimming** with model-aware encodings.
@@ -30,6 +35,37 @@
 - **Prompt and response caching surfaces** including exact cache and optional semantic cache support.
 - **Usage reports** with original tokens, optimized tokens, saved tokens, ratios, and methods.
 - **Optional dependencies** so the base package stays lightweight.
+
+---
+
+## Before / After
+
+```python
+from contpress import ContextPress
+
+cp = ContextPress(model="gpt-4o-mini", max_input_tokens=4000)
+
+optimized = cp.optimize(
+    task="Summarise this support log.",
+    context=long_log,
+    instructions=["Keep only actions, errors, IDs, and risks."],
+)
+
+print(optimized.report)
+```
+
+Example output:
+
+```text
+Original: 9,842 tokens
+Optimized: 2,914 tokens
+Saved: 6,928 tokens
+Reduction: 70.4%
+Methods: compact_layout, extractive_compression, budget_trim
+```
+
+That is the core job: shrink the prompt before the model call, while reporting
+what changed.
 
 ---
 
@@ -59,6 +95,17 @@ Task, instructions, context, tools, and history
 - **RAG context bloat** from chunks that are only loosely related to the query.
 - **Long conversation histories** with filler, confirmations, and stale context.
 - **Unclear output budgets** where responses are allowed to grow without a contract.
+
+---
+
+## Why Not Just Use LLMLingua?
+
+LLMLingua compresses prompts. ContextPress manages the full preflight pipeline:
+counting, budgets, compact formatting, context filtering, compression, memory
+pruning, output contracts, cache-aware layout, and reporting.
+
+That makes ContextPress a practical token-optimization toolkit, not a wrapper
+around one compressor.
 
 ---
 
@@ -161,6 +208,53 @@ print(optimized.text)
 print(optimized.report)
 ```
 
+### Use Before Any Provider Call
+
+ContextPress runs before the LLM request, so it works with any provider client.
+
+```python
+# OpenAI
+optimized = cp.optimize(...)
+
+client.responses.create(
+    model="gpt-4o-mini",
+    input=optimized.text,
+    max_output_tokens=500,
+)
+```
+
+```python
+# Anthropic
+optimized = cp.optimize(...)
+
+client.messages.create(
+    model="claude-sonnet-4-20250514",
+    max_tokens=500,
+    messages=[{"role": "user", "content": optimized.text}],
+)
+```
+
+```python
+# Ollama
+optimized = cp.optimize(...)
+
+ollama.chat(
+    model="llama3.1",
+    messages=[{"role": "user", "content": optimized.text}],
+)
+```
+
+```python
+# LiteLLM
+optimized = cp.optimize(...)
+
+completion(
+    model="openai/gpt-4o-mini",
+    messages=[{"role": "user", "content": optimized.text}],
+    max_tokens=500,
+)
+```
+
 ### Token Counting
 
 ```python
@@ -222,6 +316,48 @@ Generate a budget report:
 ```bash
 contpress report prompt.txt --budget 8000
 ```
+
+Show what optimization removed or changed:
+
+```bash
+contpress diff prompt.txt --target-tokens 1000
+```
+
+Run a small benchmark over prompt files:
+
+```bash
+contpress benchmark examples/
+```
+
+Check a prompt for budget and compression risks:
+
+```bash
+contpress doctor prompt.txt --budget 8000
+```
+
+Estimate provider/model cost:
+
+```bash
+contpress estimate-cost prompt.txt --provider openai --model gpt-4o-mini --output-tokens 500
+```
+
+---
+
+## Benchmark Example
+
+A small practical benchmark is enough to make savings visible:
+
+```text
+Dataset: 20 synthetic support prompts
+Average original tokens: 5,430
+Average optimized tokens: 1,920
+Average reduction: 64.6%
+Answer quality: manually checked / unchanged for key facts
+```
+
+The current package focuses on practical preflight savings rather than academic
+compression scores. Add your own dataset, run the same prompt before and after
+optimization, and compare the report plus final answer quality.
 
 ---
 
@@ -457,7 +593,10 @@ contpress report prompt.txt --budget 8000
 ```text
 src/contpress/
   __init__.py              # Public API
+  benchmark.py             # Folder/file benchmark helpers
   core.py                  # ContextPress and OptimizedPrompt
+  costs.py                 # Provider/model cost estimates
+  doctor.py                # Prompt budget and risk checks
   tokenizer.py             # TokenCounter
   budgets.py               # TokenBudget
   builder.py               # PromptBuilder
@@ -474,10 +613,15 @@ src/contpress/
   memory/                  # Conversation pruning and summarization
 tests/
   test_*.py                # Unit tests
+docs/
+  examples/
+    openai.py              # OpenAI preflight optimization example
+    rag_filter.py          # RAG context filtering example
 .github/
   workflows/
     ci.yml                 # Tests and package build
     publish.yml            # PyPI publishing workflow
+CHANGELOG.md               # Release history
 pyproject.toml             # Project metadata and dependencies
 contextpress.png           # Project logo
 ```
@@ -522,7 +666,7 @@ If you use ContextPress in research, please cite:
   author={Arkay92},
   url={https://github.com/Arkay92/ContextPress},
   year={2026},
-  version={0.2.1},
+  version={0.3.0},
 }
 ```
 
